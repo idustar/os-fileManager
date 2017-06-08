@@ -1,0 +1,138 @@
+html {
+    cursor: default;
+}
+
+.file-block {
+    display: inline-flex;
+    display: -webkit-inline-flex;
+    /* Safari */
+    flex-wrap: wrap;
+    width: 19.8%;
+    text-align: center;
+    justify-content: space-around;
+    padding-bottom: 10px;
+    margin-bottom: 30px;
+    cursor: pointer;
+    border: 1px transparent solid;
+}
+
+.file-block:hover {
+    background: #f8f7ff;
+    color: #43177d;
+}
+
+.selected {
+    background: #f4fffc;
+    color: #43177d;
+    border: 1px #d9eeff solid;
+}
+
+.file-name {
+    font-size: 16px;
+    display: block;
+    width: 100%;
+    cursor: text;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.file-name:hover {
+    background: lightgrey;
+}
+
+.file-icon {
+    font-size: 80px;
+    display: block;
+    width: 100%;
+}
+
+.address {
+    background: ghostwhite;
+    padding: 7.5px;
+    padding-left: 15px;
+    border-radius: 5px;
+    margin-bottom: 19px;
+}
+
+#address-bar {
+    border: 0px;
+    background: transparent;
+    width: 100%;
+}
+
+#main-panel {
+    OVERFLOW: auto;
+    height: 500px;
+}
+
+#tree {
+    overflow-y: auto;
+    height: 500px;
+}
+
+#txt-panel {
+    width: 100%;
+    height: 100%;
+}
+
+#txt-container {
+    width: 100%;
+    height: 100%;
+}
+
+#editor {
+    margin-bottom: 10px;
+}
+
+.attr-icon {
+    text-align: center;
+    font-size: 100px;
+}
+
+#dropdownMenu {
+    cursor: pointer;
+}
+
+#dropdownMenu:hover {
+    color: dodgerblue;
+}
+
+#dropdownMenu:active {
+    color: slateblue;
+}
+
+#file-panel {
+    width: 100%;
+    height: 100%;
+}
+
+#file-container, #file-container-outside {
+    width: 100%;
+    height: 100%;
+}
+
+.quickReverse {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    text-align: center;
+}
+
+.breadcrumb {
+    margin-left: -20px;
+}
+
+.address {
+    margin-left: -20px;
+}
+
+#txt-panel, #img-panel {
+    word-break: break-all;
+    word-wrap: break-word;
+}
+
+#img-panel>img {
+    max-width: 100%;
+}

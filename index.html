@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>File Manager</title>
+</head>
+<body>
+<!-- 加载动画，引入jquery及一些插件 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="css/loaders.css" />
+<div id="loader-wrapper">
+    <div id="loader"></div>
+    <div class="loader-section section-left"></div>
+    <div class="loader-section section-right"></div>
+    <div class="load_title">
+        文件管理系统正在加载中
+        <br />
+        <span>1552652 杜佳豪</span>
+    </div>
+</div>
+
+<!-- 加载CSS -->
+<link href="//cdn.bootcss.com/tether/1.3.6/css/tether.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<link rel="stylesheet" type="text/css" href="css/style.css" />
+<link href="https://cdn.bootcss.com/bootstrap-treeview/1.2.0/bootstrap-treeview.min.css" rel="stylesheet">
+<link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+<link href="https://cdn.bootcss.com/jquery-contextmenu/2.5.0/jquery.contextMenu.min.css" rel="stylesheet">
+
+<!-- 导航栏 -->
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">File Manager</a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="#">文件系统<span class="sr-only">(current)</span></a></li>
+                <li><a href="javascript:;" onclick="ObjToJson()">存档</a></li>
+                <li><a href="javascript:;" onclick="httpGet()">取档</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- 主框架 -->
+<div class="container">
+    <div class="row">
+        <div class="col-md-3 col-sm-4 col-xs-12">
+            <!-- 分区面板及其下拉菜单 -->
+            <div class="dropdown">
+                <div id="dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                    <span class="h2"><i class="fa fa-laptop"></i> <span id="current-disk-name">Disk</span> <i class="fa fa-angle-down"></i></span>
+                    <div class="progress">
+                        <div id="disk-remain" class="progress-bar progress-bar-striped active" role="progressbar"
+                             aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%; min-width: 2em;">
+                            <span><span id="disk-use">0</span>/<span id="disk-all">0</span></span>
+                        </div>
+                    </div>
+                </div>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenu"></ul>
+            </div>
+            <!-- 目录树 -->
+            <div id="tree">
+            </div>
+        </div>
+        <div class="col-md-9 col-sm-8 col-xs-12">
+            <!-- 回退按钮及层级面包屑 -->
+            <div class="row">
+                <div class="col-xs-2 col-md-1">
+                    <button type="button" class="btn btn-default" onclick="back()"><i class="fa fa-chevron-left"></i></button>
+                </div>
+                <div class="col-xs-10 col-md-11">
+                    <ol class="breadcrumb">
+                        <li><a href="#">Home</a></li>
+                        <li><a href="#">Library</a></li>
+                        <li class="active">Data</li>
+                    </ol>
+                    <div class="address">
+                        <input id="address-bar" value="hi">
+                    </div>
+                </div>
+            </div>
+            <!-- 主面板 -->
+            <div id="main-panel">
+                <div id="file-panel">
+                    <div id="file-container-outside" onmousedown="event.stopPropagation();unselectAll()">
+                        <element id="file-container"></element>
+                    </div>
+                </div>
+                <div id="txt-panel">
+                    <h1>文本编辑器 <small>Text Editor</small></h1>
+                    <hr>
+                    <div id="text-panel">
+                        <div id="text-container"></div>
+                        <hr>
+                        <button type="button" class="btn btn-info" onclick="startedit()">编辑文件</button>
+                    </div>
+                    <div id="editor-panel">
+                        <div id="editor">
+                            <p>请写入内容</p>
+                        </div>
+                        <button type="button" class="btn btn-info" onclick="edit()">提交修改</button>
+                        <button type="button" class="btn btn-default" onclick="noedit()">放弃变更</button>
+                    </div>
+                    <div class="alert alert-danger" role="alert">...</div>
+                </div>
+                <div id="img-panel"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 模态框 -->
+<!-- 重命名模态框 -->
+<div id="editModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">重命名</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="source-name" class="control-label">原文件名:</label>
+                        <input type="text" class="form-control" id="source-name" disabled>
+                    </div>
+                    <div class="alert alert-danger" role="alert">...</div>
+                    <div class="form-group">
+                        <label for="new-name" class="control-label">新文件名:</label>
+                        <input type="text" class="form-control" id="new-name" autofocus>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="reverseName()">确认修改</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!-- 新建文件夹模态框 -->
+<div id="newDirectoryModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">新建文件夹</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <div class="alert alert-danger" role="alert">...</div>
+                        <label for="newdir-name" class="control-label">文件夹名称:</label>
+                        <input type="text" class="form-control" id="newdir-name" autofocus>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="createElement()">确认新建</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!-- 新建文本文件模态框 -->
+<div id="newTextModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">新建文本文件</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <div class="alert alert-danger" role="alert">...</div>
+                        <label for="newtext-name" class="control-label">文件名:</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="newtext-name" autofocus>
+                            <div class="input-group-addon">.txt</div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="createFile('txt')">确认新建</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!-- 新建图像模态框 -->
+<div id="newImgModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">新建图片</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <div class="alert alert-danger" role="alert">...</div>
+                        <label for="newimg-name" class="control-label">文件名:</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="newimg-name" autofocus>
+                            <div class="input-group-addon">.img</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="upload_file" class="control-label">图片:</label>
+                        <input accept="image/*" name="upimage" id="upload_file" type="file" onchange="gen_base64()">
+                        <input hidden id="image-base64">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="createFile('img')">确认新建</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!-- 属性模态框 -->
+<div id="attrModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="attr-elem-name"></h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-xs-4 attr-icon">1</div>
+                            <div class="col-xs-8">
+                                <div class="row">
+                                    <div class="col-xs-4">类型：</div><div class="col-xs-8 attr-type">1</div>
+                                    <div class="col-xs-4">分区：</div><div class="col-xs-8 attr-disk">2</div>
+                                    <div class="col-xs-4">位置：</div><div class="col-xs-8 attr-addr">3</div>
+                                    <div class="col-xs-4">大小：</div><div class="col-xs-8 attr-size">4</div>
+                                    <div class="col-xs-4">创建时间：</div><div class="col-xs-8 attr-ca">5</div>
+                                    <div class="col-xs-4">最近更新：</div><div class="col-xs-8 attr-ea">6</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!-- 新分区模态框 -->
+<div id="newDiskModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">创建新分区</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="disk-alpha" class="control-label">分区盘符（仅包含一个大写字母):</label>
+                        <select class="form-control" id="disk-alpha">
+                            <option>A</option>
+                            <option>B</option>
+                            <option>C</option>
+                            <option>D</option>
+                            <option>E</option>
+                            <option>F</option>
+                            <option>G</option>
+                            <option>H</option>
+                            <option>I</option>
+                            <option>J</option>
+                            <option>K</option>
+                            <option>L</option>
+                            <option>M</option>
+                            <option>N</option>
+                            <option>O</option>
+                            <option>P</option>
+                            <option>Q</option>
+                            <option>R</option>
+                            <option>S</option>
+                            <option>T</option>
+                            <option>U</option>
+                            <option>V</option>
+                            <option>W</option>
+                            <option>X</option>
+                            <option>Y</option>
+                            <option>Z</option>
+                        </select>
+                    </div>
+                    <div class="alert alert-danger" role="alert">...</div>
+                    <div class="form-group">
+                        <label for="disk-size" class="control-label">分配内存大小（单位为B，1024B=1KB):</label>
+                        <input type="number" class="form-control" id="disk-size" value="1024000" min="100" max="5120000" autofocus>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="newDisk()">创建新分区</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!-- 修改分区空间模态框 -->
+<div id="editDiskModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">修改分区内存空间</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="alert alert-danger" role="alert">...</div>
+                    <div class="form-group">
+                        <label for="new-disk-size" class="control-label">分配内存大小（单位为B，1024B=1KB):</label>
+                        <input type="number" class="form-control" id="new-disk-size" value="1024000" min="100" max="5120000" autofocus>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="editDisk()">确认修改</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!-- 成功提示框 -->
+<div id="successModel" class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="gridSystemModalLabel1">系统提示</h4>
+            </div>
+            <div class="modal-body">
+                <p>操作成功！</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">知道啦</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 错误提示框 -->
+<div id="deadModel" class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="gridSystemModalLabel">错误提示</h4>
+            </div>
+            <div class="modal-body">
+                <p>粘贴失败！不能将自己移到自己的子目录中。</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">知道啦</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- 引入JS -->
+<script src="//cdn.bootcss.com/tether/1.3.6/js/tether.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="https://cdn.bootcss.com/bootstrap-treeview/1.2.0/bootstrap-treeview.min.js"></script>
+<script src="https://cdn.bootcss.com/jquery-contextmenu/2.5.0/jquery.ui.position.min.js"></script>
+<script src="https://cdn.bootcss.com/jquery-contextmenu/2.5.0/jquery.contextMenu.min.js"></script>
+<script src="//unpkg.com/wangeditor@3.0.0/release/wangEditor.min.js"></script>
+<script src="js/main.js"></script>
+<script src="js/directory.js"></script>
+<script src="js/file.js"></script>
+<script src="js/disk.js"></script>
+<script src="js/archive.js"></script>
+<script src="js/helpers.js"></script>
+</body>
+</html>
