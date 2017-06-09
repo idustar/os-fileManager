@@ -34,11 +34,11 @@ class Directory {
                 this.createDirectory(newName)
                 $('#newDirectoryModal').modal('hide')
             } else if (r===1) {
-                this.createTextFile(newName, "<p></p>")
-                $('#newTextModal').modal('hide')
+                if (this.createTextFile(newName, "<p></p>"))
+                    $('#newTextModal').modal('hide')
             } else if (r===2) {
-                this.createImgFile(newName, $('#image-base64').val())
-                $('#newImgModal').modal('hide')
+                if (this.createImgFile(newName, $('#image-base64').val()))
+                    $('#newImgModal').modal('hide')
             }
             refresh()
         }
@@ -71,6 +71,7 @@ class Directory {
         if (ans !== null) {
             goto('/'+name)
         }
+        return ans
     }
 
     // 在该目录下新建图片
@@ -79,6 +80,7 @@ class Directory {
         if (ans !== null) {
             goto('/'+name)
         }
+        return ans
     }
 
     // 由文件/目录名获取子目录或子文件，若不存在则返回null
@@ -275,18 +277,15 @@ class Directory {
                         for (let e in toBeCopyed) {
                             toBeCopyed[e].father = dir
                             let ans = dir.getElement(toBeCopyed[e].name)
-                            if (!ans) {
-                                if (toBeCopyed[e].type == "dir") {
-                                    dir.subdirs.push(toBeCopyed[e])
-                                } else {
-                                    dir.subfiles.push(toBeCopyed[e])
-                                }
+                            // 解决重名
+                            while (ans) {
+                                toBeCopyed[e].name = toBeCopyed[e].name + ".副本"
+                                ans = dir.getElement(toBeCopyed[e].name)
+                            }
+                            if (toBeCopyed[e].type == "dir") {
+                                dir.subdirs.push(toBeCopyed[e])
                             } else {
-                                if (toBeCopyed[e].type == "dir") {
-                                    ans = toBeCopyed[e]
-                                } else {
-                                    ans = toBeCopyed[e]
-                                }
+                                dir.subfiles.push(toBeCopyed[e])
                             }
                         }
                         currentElement = dir.name
@@ -384,14 +383,23 @@ class Directory {
             this.subfiles[i].del()
         let dirs = this.father.subdirs
         let ip = -1
+        let ipi = -1
         for (let i in dirs) {
-            if (dirs[i].name == currentElement) {
+            if (dirs[i].name == this.name) {
                 ip = i
+                // 从剪贴板中删除该目录
+                for (let j in toBeCopyed) {
+                    if (this.id == toBeCopyed[j].id) {
+                        ipi = j
+                        break
+                    }
+                }
                 break
             }
         }
         currentElement = this.father.name
         this.father.subdirs.splice(ip, 1)
+        if (ipi >= 0) toBeCopyed.splice(ipi, 1)
         refresh()
     }
 }

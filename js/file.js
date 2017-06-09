@@ -127,15 +127,24 @@ class File {
     del() {
         let files = this.father.subfiles
         let ip = -1
+        let ipi = -1
         for (let i in files) {
-            if (files[i].name == currentElement) {
+            if (files[i].name == this.name) {
                 ip = i
+                // 从剪贴板中删除该文件
+                for (let j in toBeCopyed) {
+                    if (files[i].id == toBeCopyed[j].id) {
+                        ipi = j
+                        break
+                    }
+                }
                 break
             }
         }
         currentElement = this.father.name
         disk.storage[this.id] = undefined
         this.father.subfiles.splice(ip, 1)
+        if (ipi >= 0) toBeCopyed.splice(ipi, 1)
         disk.remain += this.size
         refresh()
     }
