@@ -20,7 +20,7 @@ class Directory {
     }
 
     // 在该目录下新建目录或文件， r: 0=>目录 1=>文本文件 2=>图片
-    createDir (r = 0) {
+    createElem(r = 0) {
         $('.alert-danger').hide()
         let newName = ''
         if (r === 0)

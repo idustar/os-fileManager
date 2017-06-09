@@ -142,11 +142,6 @@ function goto(str) {
             console.log('not exist')
             return {error: '磁盘 '+ str.charAt(0) + ' 不存在。'}
         }
-        if (current.name !== disk.name) {
-            current.initDisk()
-            refreshDisks()
-            refreshDirectoryTree()
-        }
         current = current.root
     }
 
@@ -163,6 +158,11 @@ function goto(str) {
                 return {error: '找不到 ' + current.getCompleteAddress() + '/' + addr[i]}
         }
 
+    if (current.disk.name !== disk.name) {
+        current.disk.initDisk()
+        refreshDisks()
+        refreshDirectoryTree()
+    }
     // 渲染面包屑
     renderBreadCrumb(current)
     dir = current
@@ -212,7 +212,7 @@ function reverseName() {
 function quickReverse(obj) {
     // 修改当前typing为true
     typing = true
-    currentElement = $(obj).text()
+    currentElement = $(obj).text()?$(obj).text():currentElement
     $(obj).html('<input autofocus class="quickReverse" value="'+currentElement+'">')
 }
 
@@ -223,8 +223,8 @@ function doQuickReverse() {
 }
 
 // 创建文件夹命令
-function createElement() {
-    dir.createElement()
+function createElem() {
+    dir.createElem()
 }
 
 // 触发重命名
@@ -254,9 +254,9 @@ function startedit() {
 function createFile(type) {
     $('.alert-danger').hide()
     if (type === "txt")
-        dir.createElement(1)
+        dir.createElem(1)
     if (type === "img")
-        dir.createElement(2)
+        dir.createElem(2)
 }
 
 // 刷新磁盘集合

@@ -116,30 +116,10 @@ class File {
     reverseName() {
         $('.alert-danger').hide()
         let newName = $('#new-name').val()
-        console.log(newName+" "+this.name)
-        if (newName === "") {
-            $('.alert-danger').show()
-            $('.alert-danger').text('该值不能为空。')
-            return false
-        }
-        let pattern = /^[a-zA-Z0-9\u4e00-\u9fa5]+$/
-        if (!pattern.test(newName)) {
-            $('.alert-danger').show()
-            $('.alert-danger').text('该值只能为汉字、数字和字母的组合。')
-            return false
-        } else if (newName === this.name) {
-            $('.alert-danger').show()
-            $('.alert-danger').text('和先前对比，您并没有做出任何修改。')
-            return false
-        } else if (this.father.getElement(newName)){
-            $('.alert-danger').show()
-            $('.alert-danger').text('同一目录上有重名文件或子目录！')
-            return false
-        } else {
+        if (checkNameValidity(newName, this)) {
             this.name = newName
-            $('#myModal').modal('hide')
+            $('#editModal').modal('hide')
             refresh()
-            return true
         }
     }
 

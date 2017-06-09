@@ -8,7 +8,6 @@
 function splitAddress(str) {
     let addr = new Array()
     addr = str.split('/')
-    console.log(addr)
     return addr
 }
 
