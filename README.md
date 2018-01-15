@@ -21,6 +21,9 @@
 
 打开 `index.html` 即可运行。
 
+
+![pUZUAJ.png](https://s1.ax1x.com/2018/01/15/pUZUAJ.png)
+![pUZYBF.png](https://s1.ax1x.com/2018/01/15/pUZYBF.png)
 ![pUZm7Q.png](https://s1.ax1x.com/2018/01/15/pUZm7Q.png)
 ![pUZA6f.png](https://s1.ax1x.com/2018/01/15/pUZA6f.png)
 ![pUZEX8.png](https://s1.ax1x.com/2018/01/15/pUZEX8.png)
@@ -31,9 +34,6 @@
 ![pUZukj.png](https://s1.ax1x.com/2018/01/15/pUZukj.png)
 ![pUZ8XT.png](https://s1.ax1x.com/2018/01/15/pUZ8XT.png)
 ![pUZ110.png](https://s1.ax1x.com/2018/01/15/pUZ110.png)
-![pUZUAJ.png](https://s1.ax1x.com/2018/01/15/pUZUAJ.png)
-![pUZYBF.png](https://s1.ax1x.com/2018/01/15/pUZYBF.png)
-
 
 
 ## 分区系统
